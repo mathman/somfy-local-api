@@ -1,5 +1,6 @@
 const bonjour = require('bonjour')()
 const express = require('express')
+const bodyParser = require('body-parser');
 const axios = require('axios');
 const https = require('https');
 const fs = require('fs');
@@ -51,6 +52,7 @@ intervalId = setInterval(function() {
 	));
 	
     const app = express();
+	app.use(bodyParser.json());
 
     app.get('/queryServices', 
 		passport.authenticate('bearer', { session: false }), 
@@ -242,6 +244,31 @@ intervalId = setInterval(function() {
                     "success": false,
                 }));
             }
+		}
+	)
+	.post('/exec/apply', 
+		passport.authenticate('bearer', { session: false }), 
+		async (req, res) => {
+            
+            res.setHeader('Content-Type', 'application/json');
+            const agent = new https.Agent({
+                //ca: fs.readFileSync('overkiz-root-ca-2048.crt')
+                rejectUnauthorized: false
+            });
+
+            var config = {
+                method: 'post',
+                url: 'https://' + req['query']['host'] + ':' + req['query']['port'] + '/enduser-mobile-web/1/enduserAPI/exec/apply',
+                headers: {
+					'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + req['query']['token']
+                },
+                httpsAgent : agent,
+                data : JSON.stringify(req.body)
+            };
+
+            var response = await axios(config)
+			res.end(JSON.stringify(response.data));
 		}
 	)
 	.get('/stop', 

@@ -43,6 +43,19 @@ class somfy extends eqLogic {
 		['logicalId' => 'core:LocalIPv4AddressState', 'name' => 'Adresse IP', 'template' => 'tile'],
 		['logicalId' => 'core:ConnectivityState', 'name' => 'Etat connexion', 'template' => 'tile'],
     ];
+	
+	public static $commands = [
+        ['logicalId' => 'setClosure', 'name' => 'Consigne position', 'subType' => 'slider', 'minValue' => '0', 'maxValue' => '100', 'generic_type' => 'FLAP_SLIDER', 'inverse' => true, 'parameter' => 'slider', 'stateName' => 'core:ClosureState'],
+		['logicalId' => 'open', 'name' => 'Ouvrir', 'subType' => 'other', 'icon' => '<i class="fa fa-arrow-up"></i>', 'generic_type' => 'FLAP_UP'],
+        ['logicalId' => 'close', 'name' => 'Fermer', 'subType' => 'other', 'icon' => '<i class="fa fa-arrow-down"></i>', 'generic_type' => 'FLAP_DOWN'],
+		['logicalId' => 'stop', 'name' => 'Arreter', 'subType' => 'other', 'icon' => '<i class="far fa-stop-circle"></i>', 'generic_type' => 'FLAP_STOP'],
+		['logicalId' => 'arm', 'name' => 'Armer alarme', 'subType' => 'other', 'icon' => '<i class="icon jeedomapp-lock-home"></i>', 'generic_type' => 'ALARM_ARMED'],
+		['logicalId' => 'disarm', 'name' => 'Desarmer alarme', 'subType' => 'other', 'icon' => '<i class="icon jeedomapp-lock-ouvert"></i>', 'generic_type' => 'ALARM_RELEASED'],
+		['logicalId' => 'alarmOn', 'name' => 'Activer alarme', 'subType' => 'other', 'icon' => '<i class="icon jeedom-bell"></i>', 'generic_type' => 'SIREN_ON'],
+		['logicalId' => 'alarmOff', 'name' => 'Désactiver alarme', 'subType' => 'other', 'icon' => '<i class="icon jeedom-no-bell"></i>', 'generic_type' => 'SIREN_OFF'],
+		['logicalId' => 'on', 'name' => 'Activer', 'subType' => 'other', 'icon' => '<i class="icon jeedom-on"></i>', 'generic_type' => 'ENERGY_ON'],
+		['logicalId' => 'off', 'name' => 'Désactiver', 'subType' => 'other', 'icon' => '<i class="icon jeedom-off"></i>', 'generic_type' => 'ENERGY_OFF']
+    ];
 
     /*     * ***********************Methode static*************************** */
 
@@ -223,77 +236,101 @@ class somfy extends eqLogic {
 			case 'Pod':
 			case 'ProtocolGateway':
 				foreach ($device['states'] as $state) {
-					switch ($state['type']) {
-						case 1:
-							$cmd = $this->getCmd(null, $state['name']);
-							if (!is_object($cmd)) {
-								$cmd = new somfyCmd();
-							}
-							$key = array_search($state['name'], array_column(somfy::$states, 'logicalId'));
-							if ($key !== false) {
+					$key = array_search($state['name'], array_column(somfy::$states, 'logicalId'));
+					if ($key !== false) {
+						switch ($state['type']) {
+							case 1:
+								$cmd = $this->getCmd(null, $state['name']);
+								if (!is_object($cmd)) {
+									$cmd = new somfyCmd();
+								}
 								$cmd->setName(somfy::$states[$key]['name']);
 								$cmd->setTemplate('dashboard', somfy::$states[$key]['template']);
-							}
-							else {
-								$cmd->setName($state['name']);
-								$cmd->setTemplate('dashboard', 'tile');
-							}
-							$cmd->setTemplate('mobile', 'tile');
-							$cmd->setEqLogic_id($this->getId());
-							$cmd->setLogicalId($state['name']);
-							$cmd->setType('info');
-							$cmd->setSubType('numeric');
-							$cmd->setOrder($order);
-							$order++;
-							$cmd->save();
-							break;
-						case 3:
-							$cmd = $this->getCmd(null, $state['name']);
-							if (!is_object($cmd)) {
-								$cmd = new somfyCmd();
-							}
-							$key = array_search($state['name'], array_column(somfy::$states, 'logicalId'));
-							if ($key !== false) {
+								$cmd->setTemplate('mobile', 'tile');
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setLogicalId($state['name']);
+								$cmd->setType('info');
+								$cmd->setSubType('numeric');
+								$cmd->setOrder($order);
+								$order++;
+								$cmd->save();
+								break;
+							case 3:
+								$cmd = $this->getCmd(null, $state['name']);
+								if (!is_object($cmd)) {
+									$cmd = new somfyCmd();
+								}
 								$cmd->setName(somfy::$states[$key]['name']);
-							}
-							else {
-								$cmd->setName($state['name']);
-							}
-							$cmd->setEqLogic_id($this->getId());
-							$cmd->setLogicalId($state['name']);
-							$cmd->setType('info');
-							$cmd->setSubType('string');
-							$cmd->setOrder($order);
-							$order++;
-							$cmd->save();
-							break;
-						case 6:
-							$cmd = $this->getCmd(null, $state['name']);
-							if (!is_object($cmd)) {
-								$cmd = new somfyCmd();
-							}
-							$key = array_search($state['name'], array_column(somfy::$states, 'logicalId'));
-							if ($key !== false) {
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setLogicalId($state['name']);
+								$cmd->setType('info');
+								$cmd->setSubType('string');
+								$cmd->setOrder($order);
+								$order++;
+								$cmd->save();
+								break;
+							case 6:
+								$cmd = $this->getCmd(null, $state['name']);
+								if (!is_object($cmd)) {
+									$cmd = new somfyCmd();
+								}
 								$cmd->setName(somfy::$states[$key]['name']);
-							}
-							else {
-								$cmd->setName($state['name']);
-							}
-							$cmd->setEqLogic_id($this->getId());
-							$cmd->setLogicalId($state['name']);
-							$cmd->setType('info');
-							$cmd->setSubType('binary');
-							$cmd->setOrder($order);
-							$order++;
-							$cmd->save();
-							break;
-						default:
-							break;
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setLogicalId($state['name']);
+								$cmd->setType('info');
+								$cmd->setSubType('binary');
+								$cmd->setOrder($order);
+								$order++;
+								$cmd->save();
+								break;
+							default:
+								break;
+						}
+						log::add(__CLASS__, 'debug', "Etat " . $state['name'] . " crée");
+					}
+					else {
+						log::add(__CLASS__, 'debug', "Etat " . $state['name'] . " non pris en compte");
 					}
 				}
 				break;
 			default:
 				break;
+		}
+		foreach ($device['definition']['commands'] as $command) {
+			$key = array_search($command['commandName'], array_column(somfy::$commands, 'logicalId'));
+			if ($key !== false) {
+				$cmd = $this->getCmd(null, $command['commandName']);
+				if (!is_object($cmd)) {
+					$cmd = new somfyCmd();
+				}
+				$cmd->setName(somfy::$commands[$key]['name']);
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId($command['commandName']);
+				$cmd->setType('action');
+				$cmd->setSubType(somfy::$commands[$key]['subType']);
+				if (isset(somfy::$commands[$key]['icon'])) {
+					$cmd->setDisplay('icon', somfy::$commands[$key]['icon']);
+				}
+				if (isset(somfy::$commands[$key]['generic_type'])) {
+					$cmd->setDisplay('generic_type', somfy::$commands[$key]['generic_type']);
+				}
+				if (isset(somfy::$commands[$key]['minValue']) && isset(somfy::$commands[$key]['maxValue'])) {
+					$cmd->setConfiguration('minValue', somfy::$commands[$key]['minValue']);
+					$cmd->setConfiguration('maxValue', somfy::$commands[$key]['maxValue']);
+				}
+				if (isset(somfy::$commands[$key]['stateName'])) {
+					$cmd->setValue($this->getCmd(null, somfy::$commands[$key]['stateName'])->getId());
+				}
+
+				$cmd->setOrder($order);
+				$order++;
+				$cmd->save();
+				
+				log::add(__CLASS__, 'debug', "Commande " . $command['commandName'] . " crée");
+			}
+			else {
+				log::add(__CLASS__, 'debug', "Commande " . $command['commandName'] . " non prise en compte");
+			}
 		}
 	}
 
@@ -331,6 +368,38 @@ class somfy extends eqLogic {
             }
         }
     }
+	
+	public function sendCommand($commandName, $parameter = null) {
+		$action["deviceURL"] = $this->getLogicalId();
+		$command["name"] = $commandName;
+
+		if ($parameter !== null) {
+			$parameters = array_map('intval', explode(",", $parameter));
+			$command["parameters"] = $parameters; // array(100);
+		}
+		else {
+			$parameters = "";
+			$command["parameters"] = $parameters;
+		}
+
+		$commands[] = $command;
+
+		$action["commands"] = $commands;
+
+		$actions[] = $action;
+
+		$row["label"] = $commandName;
+		$row["actions"] = $actions;
+
+		$host = config::byKey('client_host', __CLASS__, '');
+		$port = config::byKey('client_port', __CLASS__, '');
+		$token = config::byKey('client_token', __CLASS__, '');
+        $response = somfyRequest('/exec/apply?host=' . $host . '&port=' . $port . '&token=' . $token, $row);
+		if (isset($response['execId'])) {
+			return true;
+		}
+		return false;
+	}
 
     /*     * **********************Getteur Setteur*************************** */
 }
@@ -349,11 +418,26 @@ class somfyCmd extends cmd {
         if (!is_object($eqLogic) || $eqLogic->getIsEnable() != 1) {
             throw new Exception(__('Equipement desactivé impossible d\éxecuter la commande : ' . $this->getHumanName(), __FILE__));
         }
-		log::add('somfy','debug','get '.$this->getLogicalId());
+		log::add('somfy','debug','command: '.$this->getLogicalId().' parameters: '.json_encode($_options));
 		switch ($this->getLogicalId()) {
             case "refresh":
                 return $eqLogic->refresh();
             default:
+				$key = array_search($this->getLogicalId(), array_column(somfy::$commands, 'logicalId'));
+				if ($key !== false) {
+					if (isset(somfy::$commands[$key]['parameter'])) {
+						if (isset(somfy::$commands[$key]['inverse']) && somfy::$commands[$key]['inverse'] === true) {
+							$parameter = 100 - $_options[somfy::$commands[$key]['parameter']];
+						}
+						else {
+							$parameter = $_options[somfy::$commands[$key]['parameter']];
+						}
+						return $eqLogic->sendCommand($this->getLogicalId(), $parameter);
+					}
+					else {
+						return $eqLogic->sendCommand($this->getLogicalId());
+					}
+				}
                 return false;
         }
     }
